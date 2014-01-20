@@ -23,7 +23,10 @@
 #     Path to Passenger's mod_passenger.so file
 #
 #   [*passenger_provider*]
-#     The package provider to use for the system
+#     The package provider to use for the system. Following providers are supported:
+#     gem : build from source
+#     yum : Installs the package from a yum repo. (RedHat family only)
+#     apt : Install the package from a debian repo. (Debian familiy only)
 #
 #   [*passenger_package*]
 #     The name of the Passenger package
@@ -44,7 +47,7 @@
 #
 # Requires:
 #   - apache
-#   - apache::dev
+#   - apache::dev - only for the gem provider
 #
 class passenger (
   $gem_binary_path        = $passenger::params::gem_binary_path,
@@ -61,21 +64,60 @@ class passenger (
 ) inherits passenger::params {
 
   include '::apache'
-  include '::apache::dev'
 
-  include '::passenger::install'
-  include '::passenger::config'
-  include '::passenger::compile'
+  case $package_provider {
+    'yum' : {
+      case $::osfamily {
+        'RedHat': {
+          class { '::passenger::install':
+            pass_inst_package_ensure       => 'present',
+            pass_inst_package_name         => 'mod_passenger',
+            pass_inst_package_provider     => $package_provider,
+            pass_inst_package_dependencies => '',
+          }
+          include '::passenger::config'
+          anchor { 'yum::passenger::begin': }
+          anchor { 'yum::passenger::end': }
 
-  anchor { 'passenger::begin': }
-  anchor { 'passenger::end': }
+          Anchor[ 'yum::passenger::begin'] ->
+          Class['::passenger::install'] ->
+          Class['::passenger::config'] ->
+          Anchor['yum::passenger::end']
+        }
+        default: {
+          fail("Installing passenger with yum is only supported on a RedHat, you are running on ${::operatingsystem}!")
+        }
+      }
+    }
+    'apt': {
+      case $::osfamily {
+        'Debian': {
+          fail('Installing using apt is not implemented yet')
+        }
+        default: {
+          fail("Installling passenger  with apt is only supportes on a Debian, you are running on ${::operatingsystem}!")
+        }
+      }
+    }
+    'gem': {
+      include '::apache::dev'
+      include '::passenger::install'
+      include '::passenger::config'
+      include '::passenger::compile'
 
-  #projects.puppetlabs.com - bug - #8040: Anchoring pattern
-  Anchor['passenger::begin'] ->
-  Class['apache::dev'] ->
-  Class['passenger::install'] ->
-  Class['passenger::compile'] ->
-  Class['passenger::config'] ->
-  Anchor['passenger::end']
+      anchor { 'gem::passenger::begin': }
+      anchor { 'gem::passenger::end': }
 
+      #projects.puppetlabs.com - bug - #8040: Anchoring pattern
+      Anchor['gem::passenger::begin'] ->
+      Class['apache::dev'] ->
+      Class['passenger::install'] ->
+      Class['passenger::compile'] ->
+      Class['passenger::config'] ->
+      Anchor['gem::passenger::end']
+    }
+    default: {
+      fail("Installing passenger with package provider ${package_provider} is not supported")
+    }
+  }
 }

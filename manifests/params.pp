@@ -15,7 +15,7 @@ class passenger::params {
   $passenger_version  = '3.0.9'
   $passenger_ruby     = '/usr/bin/ruby'
   $package_provider   = 'gem'
-  $passenger_provider = 'gem'
+  $passenger_provider = 'gem'  # Is this needed ?   not used in the manifests
 
   if versioncmp ($passenger_version, '4.0.0') > 0 {
     $builddir     = 'buildout'
@@ -40,7 +40,8 @@ class passenger::params {
       }
     }
     'redhat': {
-      $package_dependencies   = [ 'libcurl-devel', 'openssl-devel', 'zlib-devel' ]
+      # dependencies are needed when starting from the 'minimal' OS install
+      $package_dependencies   = [ 'ruby-devel', 'libcurl-devel', 'openssl-devel', 'zlib-devel', 'gcc', 'gcc-c++']
       $package_name           = 'passenger'
       $passenger_package      = 'passenger'
       $gem_path               = '/usr/lib/ruby/gems/1.8/gems'
