@@ -95,7 +95,7 @@ class passenger (
           fail('Installing using apt is not implemented yet')
         }
         default: {
-          fail("Installling passenger  with apt is only supportes on a Debian, you are running on ${::operatingsystem}!")
+          fail("Installing passenger with apt is only supported on a Debian, you are running on ${::operatingsystem}!")
         }
       }
     }

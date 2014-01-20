@@ -79,4 +79,51 @@ describe 'passenger' do
       end
     end
   end
+
+  describe 'on RedHat using yum provider' do
+    let(:facts) do
+      { :osfamily => 'RedHat', :operatingsystemrelease => 'thing', :concat_basedir => '/dne' }
+    end
+    let(:params) do
+      { :package_provider       => 'yum', }
+    end
+    it "installs the passenger package" do
+      should contain_package('passenger').with(
+        :name => 'mod_passenger',
+        :provider => 'yum',
+      )
+    end
+
+    it 'does not compile the package' do
+      should_not contain_exec('compile-passenger')
+      should_not contain_class('apache-dev')
+    end
+  end
+
+  describe 'raise errors on unsupported providers and hardware' do
+    context "yum on debian" do
+      let(:facts) do
+        { :osfamily => 'Debian', :operatingsystemrelease => 'thing', :concat_basedir => '/dne' }
+      end
+      let(:params) do
+        { :package_provider => 'yum', }
+      end
+      it 'should raise an error' do
+        expect { should compile }.to raise_error(Puppet::Error,/Installing passenger with yum is only supported on a RedHat/)
+      end
+    end
+    context "yum on RedHat" do
+      let(:facts) do
+        { :osfamily => 'RedHat', :operatingsystemrelease => 'thing', :concat_basedir => '/dne' }
+      end
+      let(:params) do
+        { :package_provider => 'apt', }
+      end
+      it do
+        expect { should compile}.to raise_error(Puppet::Error,/Installing passenger with apt is only supported on a Debian/)
+      end
+    end
+  end
+
+
 end
