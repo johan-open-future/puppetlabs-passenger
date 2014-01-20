@@ -23,6 +23,14 @@ class passenger::params {
     $builddir     = 'ext'
   }
 
+  # these are settings used in the passenger.conf - this should go into hiera
+
+  $config_PassengerHighPerformance = 'on'
+  $config_PassengerMaxPoolSize = inline_template("<%= (processorcount.to_i * 1.5).floor -%>")
+  $config_PassengerPoolIdleTime = '1500'
+  $config_PassengerMaxRequests = '1000'
+  $config_PassengerStatThrottleRate = '120'
+
   case $::osfamily {
     'debian': {
       $package_name           = 'passenger'
