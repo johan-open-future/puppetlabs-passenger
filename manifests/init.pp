@@ -22,11 +22,11 @@
 #   [*mod_passenger_location*]
 #     Path to Passenger's mod_passenger.so file
 #
-#   [*passenger_provider*]
+#   [*package_provider*]
 #     The package provider to use for the system. Following providers are supported:
 #     gem : build from source
 #     yum : Installs the package from a yum repo. (RedHat family only)
-#     apt : Install the package from a debian repo. (Debian familiy only)
+#     apt : Install the package from a debian repo. (Debian family only) NOT IMPLEMENTED YET
 #
 #   [*passenger_package*]
 #     The name of the Passenger package

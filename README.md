@@ -4,7 +4,7 @@ passenger
 Overview
 --------
 
-The Passenger module allows easy configuration and management of Phusion Passenger.      
+The Passenger module allows easy configuration and management of Phusion Passenger.
 
 Module Description
 -------------------
@@ -19,8 +19,8 @@ Setup
 * Apache
 * installs packages on chosen nodes 
 * package/service/configuration files for Passenger
-	
-### Beginning with Passenger	
+
+### Beginning with Passenger
 
 Install and begin managing Passenger on a node by declaring the class in your node definition:
 
@@ -41,12 +41,19 @@ This will establish Passenger on your node with sane default values. However, yo
         mod_passenger_location => '/var/lib/gems/1.8/gems/passenger-2.2.11/ext/apache2/mod_passenger.so',
       }
     }
- 
+
+The default is to install the passenger package with the 'gem' provider.  The mod_passenger package will be compiled
+on the node, meaning the needed development packages and compilers are needed/installed on the node.  In production like
+environments, this is very bad practice. It is much better to install the passenger module using a pre-build package.
+This can be done using the '$package_provider' parameter.
+
+* RedHat : use **package_provider => 'yum'**
+* Debian : use **package_provider => 'apt'** (not implemented yet)
+
 Usage
 ------
 
-The `passenger` class has a set of configurable parameters that allow you to control aspects of Passenger's installation. 
-
+The `passenger` class has a set of configurable parameters that allow you to control aspects of Passenger's installation.
 **Parameters within `passenger`**
 
 ####`passenger_version`
@@ -65,9 +72,10 @@ Path to Rubygems binaries on your system
 
 Path to Passenger's mod_passenger.so file
 
-####`passenger_provider`
+####`package_provider`
 
-The package provider to use for the system
+The package provider to use for the system, Defaults to 'gem'.
+Supported are 'yum' on RedHat and 'apt' on Debian
 
 ####`passenger_package`
 
