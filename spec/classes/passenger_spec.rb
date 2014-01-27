@@ -2,8 +2,10 @@ require 'spec_helper'
 
 describe 'passenger' do
   let(:facts) do
-    { :concat_basedir => '/dne' }
+    { :concat_basedir => '/dne',
+      :processorcount => '2' }  # needed for the template
   end
+
   let(:params) do
     {
       :passenger_version      => '3.0.19',
@@ -17,7 +19,7 @@ describe 'passenger' do
 
   describe 'on RedHat' do
     let(:facts) do
-      { :osfamily => 'redhat', :operatingsystemrelease => '6.4', :concat_basedir => '/dne' }
+      { :osfamily => 'redhat', :operatingsystemrelease => '6.4', :concat_basedir => '/dne', :processorcount => '2' }
     end
 
     it 'adds libcurl-devel for compilation' do
@@ -33,7 +35,7 @@ describe 'passenger' do
 
   describe 'on Debian' do
     let(:facts) do
-      { :osfamily => 'debian', :operatingsystemrelease => '7', :concat_basedir => '/dne' }
+      { :osfamily => 'debian', :operatingsystemrelease => '7', :concat_basedir => '/dne', :processorcount => '2' }
     end
 
     it 'adds mods-available files' do
@@ -56,7 +58,7 @@ describe 'passenger' do
 
   ['redhat', 'debian'].each do |osfamily|
     let(:facts) do
-      { :osfamily => osfamily, :operatingsystemrelease => 'thing', :concat_basedir => '/dne' }
+      { :osfamily => osfamily, :operatingsystemrelease => 'thing', :concat_basedir => '/dne', :processorcount => '2' }
     end
 
     context "on #{osfamily} with customized params" do
@@ -82,7 +84,7 @@ describe 'passenger' do
 
   describe 'on RedHat using yum provider' do
     let(:facts) do
-      { :osfamily => 'RedHat', :operatingsystemrelease => 'thing', :concat_basedir => '/dne' }
+      { :osfamily => 'RedHat', :operatingsystemrelease => 'thing', :concat_basedir => '/dne', :processorcount => '2' }
     end
     let(:params) do
       { :package_provider       => 'yum', }
@@ -103,7 +105,7 @@ describe 'passenger' do
   describe 'raise errors on unsupported providers and hardware' do
     context "yum on debian" do
       let(:facts) do
-        { :osfamily => 'Debian', :operatingsystemrelease => 'thing', :concat_basedir => '/dne' }
+        { :osfamily => 'Debian', :operatingsystemrelease => 'thing', :concat_basedir => '/dne', :processorcount => '2' }
       end
       let(:params) do
         { :package_provider => 'yum', }
@@ -114,7 +116,7 @@ describe 'passenger' do
     end
     context "yum on RedHat" do
       let(:facts) do
-        { :osfamily => 'RedHat', :operatingsystemrelease => 'thing', :concat_basedir => '/dne' }
+        { :osfamily => 'RedHat', :operatingsystemrelease => 'thing', :concat_basedir => '/dne', :processorcount => '2' }
       end
       let(:params) do
         { :package_provider => 'apt', }

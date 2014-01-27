@@ -33,7 +33,7 @@ This will establish Passenger on your node with sane default values. However, yo
     node default {
       class {'passenger':
         passenger_version      => '2.2.11',
-        passenger_provider     => 'gem',
+        package_provider       => 'gem',
         passenger_package      => 'passenger',
         gem_path               => '/var/lib/gems/1.8/gems',
         gem_binary_path        => '/var/lib/gems/1.8/bin',

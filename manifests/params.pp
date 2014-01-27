@@ -11,8 +11,8 @@
 # Sample Usage:
 #
 class passenger::params {
-  $package_ensure     = '3.0.9'
-  $passenger_version  = '3.0.9'
+  $package_ensure     = '4.0.33'
+  $passenger_version  = '4.0.33'
   $passenger_ruby     = '/usr/bin/ruby'
   $package_provider   = 'gem'
   $passenger_provider = 'gem'  # Is this needed ?   not used in the manifests
@@ -26,25 +26,30 @@ class passenger::params {
   # these are settings used in the passenger.conf - this should go into hiera
 
   $config_PassengerHighPerformance = 'on'
-  $config_PassengerMaxPoolSize = inline_template("<%= (processorcount.to_i * 1.5).floor -%>")
+  $config_PassengerMaxPoolSize = inline_template("<%= ( processorcount.to_i * 1.5 ).floor -%>")
   $config_PassengerPoolIdleTime = '1500'
   $config_PassengerMaxRequests = '1000'
   $config_PassengerStatThrottleRate = '120'
 
   case $::osfamily {
     'debian': {
+      if $::lsbdistcodename > '7' {
+        $ruby_lib_dir = '/usr/lib/ruby/gems/1.9.1/'
+      } else {
+        $ruby_lib_dir = '/usr/lib/ruby/gems/1.8'
+      }
       $package_name           = 'passenger'
       $passenger_package      = 'passenger'
-      $gem_path               = '/var/lib/gems/1.8/gems'
-      $gem_binary_path        = '/var/lib/gems/1.8/bin'
-      $passenger_root         = "/var/lib/gems/1.8/gems/passenger-${passenger_version}"
-      $mod_passenger_location = "/var/lib/gems/1.8/gems/passenger-${passenger_version}/ext/apache2/mod_passenger.so"
+      $gem_path               = "${ruby_lib_dir}/gems"
+      $gem_binary_path        = "${ruby_lib_dir}/bin"
+      $passenger_root         = "${ruby_lib_dir}/gems/passenger-${passenger_version}"
+      $mod_passenger_location = "${ruby_lib_dir}/gems/passenger-${passenger_version}/${builddir}/apache2/mod_passenger.so"
 
       # Ubuntu does not have libopenssl-ruby - it's packaged in libruby
       if $::lsbdistid == 'Debian' and $::lsbmajdistrelease <= 5 {
-        $package_dependencies   = [ 'libopenssl-ruby', 'libcurl4-openssl-dev' ]
+        $package_dependencies   = [ 'libopenssl-ruby', 'libcurl4-openssl-dev', 'build-essential', 'zlib1g-dev' ]
       } else {
-        $package_dependencies   = [ 'libruby', 'libcurl4-openssl-dev' ]
+        $package_dependencies   = [ 'libruby', 'libcurl4-openssl-dev', 'build-essential', 'zlib1g-dev' ]
       }
     }
     'redhat': {
@@ -55,7 +60,7 @@ class passenger::params {
       $gem_path               = '/usr/lib/ruby/gems/1.8/gems'
       $gem_binary_path        = '/usr/lib/ruby/gems/1.8/gems/bin'
       $passenger_root         = "/usr/lib/ruby/gems/1.8/gems/passenger-${passenger_version}"
-      $mod_passenger_location = "/usr/lib/ruby/gems/1.8/gems/passenger-${passenger_version}/ext/apache2/mod_passenger.so"
+      $mod_passenger_location = "/usr/lib/ruby/gems/1.8/gems/passenger-${passenger_version}/${builddir}/apache2/mod_passenger.so"
     }
     'darwin':{
       $package_name           = 'passenger'
@@ -63,7 +68,7 @@ class passenger::params {
       $gem_path               = '/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin'
       $gem_binary_path        = '/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin'
       $passenger_root         = "/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin/passenger-${passenger_version}"
-      $mod_passenger_location = "/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin/passenger-${passenger_version}/ext/apache2/mod_passenger.so"
+      $mod_passenger_location = "/System/Library/Frameworks/Ruby.framework/Versions/Current/usr/bin/passenger-${passenger_version}/i${builddir}/apache2/mod_passenger.so"
     }
     default: {
       fail("Operating system ${::operatingsystem} is not supported with the Passenger module")

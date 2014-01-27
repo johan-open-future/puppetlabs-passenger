@@ -92,7 +92,20 @@ class passenger (
     'apt': {
       case $::osfamily {
         'Debian': {
-          fail('Installing using apt is not implemented yet')
+          class { '::passenger::install':
+            pass_inst_package_ensure       => '4.0.33',
+            pass_inst_package_name         => 'libapache2-mod-passenger',
+            pass_inst_package_provider     => $package_provider,
+            pass_inst_package_dependencies => '',
+          }
+          include '::passenger::config'
+          anchor { 'apt::passenger::begin': }
+          anchor { 'apt::passenger::end': }
+
+          Anchor[ 'apt::passenger::begin'] ->
+          Class['::passenger::install'] ->
+          Class['::passenger::config'] ->
+          Anchor['apt::passenger::end']
         }
         default: {
           fail("Installing passenger with apt is only supported on a Debian, you are running on ${::operatingsystem}!")
